@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/new/IconsHome">
+        <file>Icons/delete_off.png</file>
+        <file>Icons/delete_on.png</file>
+        <file>Icons/image_off.png</file>
+        <file>Icons/image_on.png</file>
+        <file>Icons/important_off.png</file>
+        <file>Icons/important_on.png</file>
+        <file>Icons/pin_off.png</file>
+        <file>Icons/pin_on.png</file>
+        <file>Icons/refresh.png</file>
+    </qresource>
+</RCC>
