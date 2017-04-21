@@ -11,6 +11,7 @@ class List
 {
 public:
     int listID;
+    int userID;
     vector<Item*> listItem;
     vector<Permission*> listPermission;
     string color;
@@ -20,15 +21,17 @@ public:
     bool isDeleted;
 
     List(){}
+    List(int,int,vector<Item*>,vector<Permission*>,string,string,QDate,QDate,bool);
     List(int,vector<Item*>,vector<Permission*>,string,string,QDate,QDate,bool);
-    List(vector<Item*>,vector<Permission*>,string,string,QDate,QDate,bool);
+    List(int,string,string);
 
     Item* getItem(int);
 };
 
-List::List(int _listID,vector<Item*> _listItem,vector<Permission*> _listPermission,string _color,string _description,QDate _createDate,QDate _deleteDate, bool _isDeleted)
+inline List::List(int _listID, int _userID,vector<Item*> _listItem,vector<Permission*> _listPermission,string _color,string _description,QDate _createDate,QDate _deleteDate, bool _isDeleted)
 {
     this->listID = _listID;
+    this->userID = _userID;
     this->listItem = _listItem;
     this->listPermission = _listPermission;
     this->color = _color;
@@ -38,8 +41,9 @@ List::List(int _listID,vector<Item*> _listItem,vector<Permission*> _listPermissi
     this->isDeleted = _isDeleted;
 }
 
-List::List(vector<Item*> _listItem,vector<Permission*> _listPermission,string _color,string _description,QDate _createDate,QDate _deleteDate, bool _isDeleted)
+inline List::List(int _userID,vector<Item*> _listItem,vector<Permission*> _listPermission,string _color,string _description,QDate _createDate,QDate _deleteDate, bool _isDeleted)
 {
+    this->userID = _userID;
     this->listItem = _listItem;
     this->listPermission = _listPermission;
     this->color = _color;
@@ -49,7 +53,22 @@ List::List(vector<Item*> _listItem,vector<Permission*> _listPermission,string _c
     this->isDeleted = _isDeleted;
 }
 
-Item* List::getItem(int id){
+inline List::List(int _userID,string _description,string _color)
+{
+    vector<Item*> items;
+    vector<Permission*> permissions;
+
+    this->userID= _userID;
+    this->listItem = items;
+    this->listPermission = permissions;
+    this->color = _color;
+    this->description = _description;
+    this->createDate = QDate();
+    this->deleteDate = QDate(1,1,1);
+    this->isDeleted = false;
+}
+
+inline Item* List::getItem(int id){
     for(Item* &item : this->listItem){
         if(item->itemID == id){
             return item;

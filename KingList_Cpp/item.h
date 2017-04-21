@@ -32,7 +32,7 @@ public:
     void del();
 };
 
-Item::Item(int _itemID, int _userID, string _title, QDate _createDate, QDate _checkDate, bool _isChecked, QDate _deleteDate, bool _isDeleted, bool _isPinned, bool _isFavorite)
+inline Item::Item(int _itemID, int _userID, string _title, QDate _createDate, QDate _checkDate, bool _isChecked, QDate _deleteDate, bool _isDeleted, bool _isPinned, bool _isFavorite)
 {
     this->itemID = _itemID;
     this->userID = _userID;
@@ -46,7 +46,7 @@ Item::Item(int _itemID, int _userID, string _title, QDate _createDate, QDate _ch
     this->isFavorite = _isFavorite;
 }
 
-Item::Item( int _userID, string _title, QDate _createDate, QDate _checkDate, bool _isChecked, QDate _deleteDate, bool _isDeleted,bool _isPinned, bool _isFavorite)
+inline Item::Item( int _userID, string _title, QDate _createDate, QDate _checkDate, bool _isChecked, QDate _deleteDate, bool _isDeleted,bool _isPinned, bool _isFavorite)
 {
     this->userID = _userID;
     this->title = _title;
@@ -59,19 +59,19 @@ Item::Item( int _userID, string _title, QDate _createDate, QDate _checkDate, boo
     this->isFavorite = _isFavorite;
 }
 
-void Item::setPin(){
+inline void Item::setPin(){
     this->isPinned = (this->isPinned)? false:true;
 }
 
-void Item::setFav(){
+inline void Item::setFav(){
     this->isFavorite = (this->isFavorite)? false:true;
 }
 
-void Item::setImg(){
+inline void Item::setImg(){
     cout << "Setting Img: " << this->title << endl;
 }
 
-void Item::del(){
+inline void Item::del(){
     cout << "Deleting: " << this->title << endl;
 }
 

@@ -16,7 +16,7 @@ public:
      Permission(int,bool,bool,bool,bool);
      Permission(bool,bool,bool,bool);
 };
-Permission::Permission(int _userID, bool _canWrite, bool _canCheck, bool _canDelete, bool _canShare)
+inline Permission::Permission(int _userID, bool _canWrite, bool _canCheck, bool _canDelete, bool _canShare)
 {
     this->userID = _userID;
     this->canWrite = _canWrite;
@@ -25,7 +25,7 @@ Permission::Permission(int _userID, bool _canWrite, bool _canCheck, bool _canDel
     this->canShare = _canShare;
 }
 
-Permission::Permission( bool _canWrite, bool _canCheck, bool _canDelete, bool _canShare)
+inline Permission::Permission( bool _canWrite, bool _canCheck, bool _canDelete, bool _canShare)
 {
     this->canWrite = _canWrite;
     this->canCheck = _canCheck;

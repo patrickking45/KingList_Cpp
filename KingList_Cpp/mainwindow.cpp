@@ -3,10 +3,13 @@
 #include "liste.h"
 #include <QSignalMapper>
 #include <QPushButton>
+#include <QLabel>
+#include <newlistdialog.h>
 
 using namespace std;
 
 List* actualList;
+static vector<List*> listOfLists;
 
 
 vector<string> split(string str, string sep){
@@ -23,7 +26,8 @@ vector<string> split(string str, string sep){
 
 vector<List*> testInit(){
 
-    vector<List*> listOfLists;
+    listOfLists.clear();
+
     vector<Item*> items;
     vector<Permission*> permissions;
 
@@ -63,8 +67,6 @@ vector<List*> getUserLists(){
     return testInit();
 }
 
-
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -82,7 +84,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(deco, SIGNAL(triggered(bool)), this, SLOT(on_deconnexionAction_triggered()));
     connect(refresh, SIGNAL(triggered(bool)), this, SLOT(on_refreshAction_triggered()));
 
-    this->showLists();
+    vector<List*> initLists = getUserLists();
+
+    this->showLists(initLists);
     }
 
 MainWindow::~MainWindow()
@@ -247,10 +251,9 @@ void MainWindow::showList(QListWidgetItem* item){
     ui->listItemTable->show();
 }
 
-void MainWindow::showLists(){
-    ui->listLists->clear();
+void MainWindow::showLists(vector<List*> lists){
 
-    vector<List*> lists = getUserLists();
+    ui->listLists->clear();
 
     for(int i = 0; i < lists.size(); i++){
         List* list = lists[i];
@@ -258,8 +261,7 @@ void MainWindow::showLists(){
         QVariant qv;
         qv.setValue(list);
 
-        cout << "Showing" << endl;
-        QListWidgetItem *item = new QListWidgetItem();
+        QListWidgetItem * item = new QListWidgetItem;
         item->setText(QString::fromStdString(list->description));
         vector<string> rgb = split(list->color,",");
         item->setBackgroundColor(QColor(stoi(rgb[0]),stoi(rgb[1]),stoi(rgb[2]),255));
@@ -277,12 +279,18 @@ void MainWindow::on_deconnexionAction_triggered()
 void MainWindow::on_refreshAction_triggered()
 {
     cout << "Refreshing" << endl;
-    this->showLists();
+    this->showLists(listOfLists);
 }
 
 void MainWindow::on_actionNew_triggered()
 {
-
+    NewListDialog newListDialog;
+    newListDialog.setModal(true);
+    if(newListDialog.exec()){
+        List* newList = newListDialog.getList();
+        listOfLists.push_back(newList);
+        this->showLists(listOfLists);
+    }
 }
 
 void MainWindow::on_actionDelete_triggered()

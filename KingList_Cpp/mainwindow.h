@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 #include <QListWidgetItem>
+#include <liste.h>
+
+using namespace std;
 
 namespace Ui {
 class MainWindow;
@@ -16,7 +19,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void showLists();
+    void showLists(vector<List*>);
 
 public slots:
     void showList(QListWidgetItem*);
