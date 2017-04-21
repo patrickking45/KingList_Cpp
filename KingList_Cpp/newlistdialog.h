@@ -17,11 +17,14 @@ public:
     ~NewListDialog();
 
     List* getList();
+    void setData(List*);
 
 private slots:
     void on_pushButton_clicked();
 
     void on_pushButton_2_clicked();
+
+    void on_colorPicker_clicked();
 
 private:
     Ui::NewListDialog *ui;

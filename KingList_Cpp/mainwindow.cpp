@@ -3,6 +3,7 @@
 #include "liste.h"
 #include <QSignalMapper>
 #include <QPushButton>
+#include <QMessageBox>
 #include <QLabel>
 #include <newlistdialog.h>
 
@@ -12,7 +13,7 @@ List* actualList;
 static vector<List*> listOfLists;
 
 
-vector<string> split(string str, string sep){
+inline vector<string> split(string str, string sep){
     char* cstr=const_cast<char*>(str.c_str());
     char* current;
     vector<string> arr;
@@ -65,6 +66,16 @@ vector<List*> testInit(){
 vector<List*> getUserLists(){
     //Call WebServices
     return testInit();
+}
+
+List* getListById(int id){
+    for(int i = 0 ; i < listOfLists.size(); i++){
+        if(listOfLists[i]->listID == id){
+            cout << listOfLists[i]->description << endl;
+            return listOfLists[i];
+        }
+    }
+    return NULL;
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -295,10 +306,30 @@ void MainWindow::on_actionNew_triggered()
 
 void MainWindow::on_actionDelete_triggered()
 {
+    QMessageBox confirmationBox;
+    confirmationBox.setText(QString("Are you sure you want to delete this list?"));
+    confirmationBox.setInformativeText(QString::fromStdString(actualList->description));
+    confirmationBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 
+    if(confirmationBox.exec() == QMessageBox::Ok){
+        listOfLists.erase(remove(listOfLists.begin(), listOfLists.end(), actualList),listOfLists.end());
+    }
+
+    this->on_refreshAction_triggered();
 }
 
 void MainWindow::on_actionEdit_triggered()
 {
+    NewListDialog editListDialog;
+    editListDialog.setModal(true);
+    editListDialog.setData(actualList);
+    if(editListDialog.exec()){
+        List* editingList = getListById(actualList->listID);
+        List* editedList = editListDialog.getList();
 
+        editingList->description = editedList->description;
+        editingList->color = editedList->color;
+
+        this->showLists(listOfLists);
+    }
 }
