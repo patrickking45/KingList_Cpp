@@ -5,10 +5,12 @@
 #include <QPushButton>
 #include <QCheckBox>
 #include <QMessageBox>
+#include <QFileDialog>
 #include <QLabel>
 #include <newlistdialog.h>
 #include <sharingdialog.h>
 #include <additemdialog.h>
+#include <displayimagedialog.h>
 
 using namespace std;
 
@@ -151,9 +153,27 @@ void MainWindow::clickedFav(int id){
 }
 
 void MainWindow::clickedImg(int id){
-    cout << "Clicked Img :" << actualList->getItem(id)->title << endl;
-    actualList->getItem(id)->setImg();
-    //Refresh List
+
+    Item* item = actualList->getItem(id);
+
+    if(!item->image.isNull()){
+        DisplayImageDialog imageDialog;
+        imageDialog.setModal(true);
+        imageDialog.setImage(item->image);
+        if(imageDialog.exec() == 2){
+            item->image = QPixmap();
+            this->refresh();
+        }
+    }
+    else{
+        QFileDialog uploadImage(this);
+        uploadImage.setNameFilter(tr("Images (*.png *.jpg *.jpeg)"));
+        uploadImage.setViewMode(QFileDialog::Detail);
+        QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "C:/", tr("Images (*.png *.jpg *.jpeg)"));
+        actualList->getItem(id)->image = QPixmap(fileName);
+
+        this->refresh();
+    }
 }
 
 void MainWindow::clickedDel(int id){
@@ -316,13 +336,14 @@ void MainWindow::showItems(vector<Item*> items){
         QPushButton* btn_image = new QPushButton();
         signalMapperImg->setMapping(btn_image, item->itemID);
         connect(btn_image, SIGNAL(clicked()), signalMapperImg, SLOT(map()));
-        btn_image->setCheckable(false);
 
-        QIcon ico_image;
-        ico_image.addFile(":/new/IconsHome/Icons/image_on.png",QSize(Icon_Size,Icon_Size),QIcon::Normal,QIcon::On);
-        ico_image.addFile(":/new/IconsHome/Icons/image_off.png",QSize(Icon_Size,Icon_Size),QIcon::Normal,QIcon::Off);
+        if(item->image.isNull()){
+            btn_image->setIcon(QIcon(":/new/IconsHome/Icons/image_off.png"));
+        }
+        else{
+            btn_image->setIcon(QIcon(":/new/IconsHome/Icons/image_on.png"));
+        }
 
-        btn_image->setIcon(ico_image);
         btn_image->setFlat(true);
         btn_image->setStyleSheet("QPushButton:checked { background:none; border: none; } QPushButton:pressed { background:none; border: none; }");
 

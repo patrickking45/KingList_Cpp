@@ -28,7 +28,8 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     sharingdialog.cpp \
     invitedialog.cpp \
-    additemdialog.cpp
+    additemdialog.cpp \
+    displayimagedialog.cpp
 
 HEADERS  += mainwindow.h \
     permission.h \
@@ -38,13 +39,15 @@ HEADERS  += mainwindow.h \
     newlistdialog.h \
     sharingdialog.h \
     invitedialog.h \
-    additemdialog.h
+    additemdialog.h \
+    displayimagedialog.h
 
 FORMS    += mainwindow.ui \
     newlistdialog.ui \
     sharingdialog.ui \
     invitedialog.ui \
-    additemdialog.ui
+    additemdialog.ui \
+    displayimagedialog.ui
 
 RESOURCES += \
     resources.qrc
