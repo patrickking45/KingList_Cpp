@@ -19,6 +19,8 @@ public:
     ~SharingDialog();
     void setPermissions(vector<Permission*>);
     void showShares();
+    vector<Permission*> getPermissions();
+    Permission* getPermissionById(int);
 
 public slots:
     void clickedCheck(int buttonId);
@@ -26,6 +28,9 @@ public slots:
     void clickedDelete(int buttonId);
     void clickedShare(int buttonId);
     void clickedUnShare(int buttonId);
+
+private slots:
+    void on_pushButton_clicked();
 
 private:
     Ui::SharingDialog *ui;

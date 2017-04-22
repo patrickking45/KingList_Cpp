@@ -53,8 +53,21 @@
       <x>205</x>
       <y>1</y>
       <width>631</width>
-      <height>541</height>
+      <height>511</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_add_item">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>520</y>
+      <width>151</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Ajouter un Item</string>
     </property>
    </widget>
   </widget>

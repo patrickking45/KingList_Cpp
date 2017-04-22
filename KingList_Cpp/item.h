@@ -26,6 +26,7 @@ public:
        Item(int,int,string,QDate,QDate,bool,QDate,bool,bool,bool);
        Item(int,string,QDate,QDate,bool,QDate,bool,bool,bool);
 
+    void setCheck();
     void setPin();
     void setFav();
     void setImg();
@@ -57,6 +58,10 @@ inline Item::Item( int _userID, string _title, QDate _createDate, QDate _checkDa
     this->isDeleted= _isDeleted;
     this->isPinned = _isPinned;
     this->isFavorite = _isFavorite;
+}
+
+inline void Item::setCheck(){
+    this->isChecked = (this->isChecked)? false:true;
 }
 
 inline void Item::setPin(){

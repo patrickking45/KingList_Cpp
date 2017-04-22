@@ -3,10 +3,12 @@
 #include "liste.h"
 #include <QSignalMapper>
 #include <QPushButton>
+#include <QCheckBox>
 #include <QMessageBox>
 #include <QLabel>
 #include <newlistdialog.h>
 #include <sharingdialog.h>
+#include <additemdialog.h>
 
 using namespace std;
 
@@ -14,6 +16,11 @@ List* actualList;
 static vector<List*> listOfLists;
 QAction* sharing;
 
+struct isImportant{
+    inline bool operator() (const Item* item1, const Item* item2){
+        return (item1->isFavorite > item2->isFavorite);
+    }
+};
 
 inline vector<string> split(string str, string sep){
     char* cstr=const_cast<char*>(str.c_str());
@@ -44,7 +51,7 @@ vector<List*> testInit(){
     permissions.push_back(new Permission(335, 104, true, false, true, true));
     permissions.push_back(new Permission(336, 115, true, false, false, false));
 
-    listOfLists.push_back(new List(1,items,permissions,"96,69,42","Épicerie",QDate(2017,04,18),QDate(1,1,1), false));
+    listOfLists.push_back(new List(1,1,items,permissions,"96,69,42","Épicerie",QDate(2017,04,18),QDate(1,1,1), false));
 
     items.clear();
     items.push_back(new Item(21, 154887, "John Wick 2", QDate(2017,04,18), QDate(1,1,1), false, QDate(1,1,1), false, false, true));
@@ -52,7 +59,12 @@ vector<List*> testInit(){
     items.push_back(new Item(23, 154887, "Thor: Ragnarok", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, true, true));
     items.push_back(new Item(24, 154887, "Histoire de Jouet 3", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, false, false));
 
-    listOfLists.push_back(new List(2,items,permissions,"255,250,240","Films",QDate(2017,04,18),QDate(1,1,1), false));
+    permissions.clear();
+    permissions.push_back(new Permission(334, 103, true, true, false, true));
+    permissions.push_back(new Permission(335, 104, true, false, true, true));
+    permissions.push_back(new Permission(336, 115, true, false, false, false));
+
+    listOfLists.push_back(new List(2,2,items,permissions,"255,250,240","Films",QDate(2017,04,18),QDate(1,1,1), false));
 
     items.clear();
     items.push_back(new Item(31, 154887, "Android", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, false, false));
@@ -61,11 +73,15 @@ vector<List*> testInit(){
     items.push_back(new Item(34, 154887, "Angular", QDate(2017,04,18), QDate(1,1,1), false, QDate(1,1,1), false, false, true));
     items.push_back(new Item(35, 154887, "Java EE", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, true, false));
 
-    listOfLists.push_back(new List(3,items,permissions,"200,169,113","Devoir",QDate(2017,04,18),QDate(1,1,1), false));
+    permissions.clear();
+
+    listOfLists.push_back(new List(3,3,items,permissions,"200,169,113","Devoir",QDate(2017,04,18),QDate(1,1,1), false));
 
     items.clear();
 
-    listOfLists.push_back(new List(4,items,permissions,"100,150,225","To Do",QDate(2017,04,18),QDate(1,1,1), false));
+    permissions.clear();
+
+    listOfLists.push_back(new List(4,4,items,permissions,"100,150,225","To Do",QDate(2017,04,18),QDate(1,1,1), false));
 
     return listOfLists;
 
@@ -118,6 +134,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::clickedCheck(int id){
+    cout << "Clicked Check :" << actualList->getItem(id)->title << endl;
+    actualList->getItem(id)->setCheck();
+}
+
 void MainWindow::clickedPin(int id){
     cout << "Clicked Pin :" << actualList->getItem(id)->title << endl;
     actualList->getItem(id)->setPin();
@@ -126,6 +147,7 @@ void MainWindow::clickedPin(int id){
 void MainWindow::clickedFav(int id){
     cout << "Clicked Fav :" << actualList->getItem(id)->title << endl;
     actualList->getItem(id)->setFav();
+    this->refresh();
 }
 
 void MainWindow::clickedImg(int id){
@@ -135,24 +157,71 @@ void MainWindow::clickedImg(int id){
 }
 
 void MainWindow::clickedDel(int id){
-    cout << "Clicked Del :" << actualList->getItem(id)->title << endl;
-    actualList->getItem(id)->del();
+    QMessageBox confirmationBox;
+    confirmationBox.setText(QString("Are you sure you want to delete this item?"));
+    confirmationBox.setInformativeText(QString::fromStdString(actualList->getItem(id)->title));
+    confirmationBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+
+    if(confirmationBox.exec() == QMessageBox::Ok){
+        actualList->listItem.erase(remove(actualList->listItem.begin(), actualList->listItem.end(), actualList->getItem(id)),actualList->listItem.end());
+    }
+
+    this->refresh();
 }
 
 void MainWindow::refresh(){
+    List* refreshedList = new List();
+
     this->showLists(listOfLists);
+
+    if(actualList){
+        for(int i=0; i<listOfLists.size(); i++){
+            if(listOfLists[i]->listID == actualList->listID){
+                refreshedList = listOfLists[i];
+            }
+        }
+        actualList = refreshedList;
+
+        this->showItems(actualList->listItem);
+    }
 }
 
 void MainWindow::showList(QListWidgetItem* item){
     List* list = item->data(Qt::UserRole).value<List*>();
-    QTableWidgetItem *tableItem = 0;
-    QTableWidgetItem *checkBoxItem = 0;
-    int Icon_Size = 50;
+    this->showItems(list->listItem);
 
     actualList = list;
     ui->actionEdit->setVisible(true);
     ui->actionDelete->setVisible(true);
     sharing->setVisible(true );
+}
+
+void MainWindow::showLists(vector<List*> lists){
+
+    ui->listLists->clear();
+
+    for(int i = 0; i < lists.size(); i++){
+        List* list = lists[i];
+
+        QVariant qv;
+        qv.setValue(list);
+
+        QListWidgetItem * item = new QListWidgetItem;
+        item->setText(QString::fromStdString(list->description));
+        vector<string> rgb = split(list->color,",");
+        item->setBackgroundColor(QColor(stoi(rgb[0]),stoi(rgb[1]),stoi(rgb[2]),255));
+        item->setData(Qt::UserRole,qv);
+
+        ui->listLists->addItem(item);
+    }
+}
+
+void MainWindow::showItems(vector<Item*> items){
+
+    sort(items.begin(), items.end(), isImportant());
+
+    QTableWidgetItem *tableItem = 0;
+    int Icon_Size = 50;
 
     ui->listItemTable->clear();
     ui->listItemTable->horizontalHeader()->hide();
@@ -168,18 +237,22 @@ void MainWindow::showList(QListWidgetItem* item){
     ui->listItemTable->setColumnWidth(4,40);
     ui->listItemTable->setColumnWidth(5,40);
 
-    ui->listItemTable->setRowCount(list->listItem.size());
+    ui->listItemTable->setRowCount(items.size());
 
-    for(int i=0; i<list->listItem.size();i++){
-        Item* item = list->listItem[i];
+    for(int i=0; i<items.size();i++){
+        Item* item = items[i];
         Qt::CheckState check = ((item->isChecked) ? Qt::Checked : Qt::Unchecked);
         Qt::CheckState pin = ((item->isPinned) ? Qt::Checked : Qt::Unchecked);
         Qt::CheckState important = ((item->isFavorite) ? Qt::Checked : Qt::Unchecked);
 
+        QSignalMapper* signalMapperCheck;
         QSignalMapper* signalMapperPin;
         QSignalMapper* signalMapperFav;
         QSignalMapper* signalMapperImg;
         QSignalMapper* signalMapperDel;
+
+        signalMapperCheck = new QSignalMapper(this);
+        connect(signalMapperCheck, SIGNAL(mapped(int)), this, SLOT(clickedCheck(int)));
 
         signalMapperPin = new QSignalMapper(this);
         connect(signalMapperPin, SIGNAL(mapped(int)), this, SLOT(clickedPin(int)));
@@ -201,9 +274,10 @@ void MainWindow::showList(QListWidgetItem* item){
 
         /* CheckBox */
 
-        checkBoxItem = new QTableWidgetItem();
+        QCheckBox* checkBoxItem = new QCheckBox();
         checkBoxItem->setCheckState(check);
-        checkBoxItem->setData(Qt::UserRole,qv);
+        signalMapperCheck->setMapping(checkBoxItem, item->itemID);
+        connect(checkBoxItem, SIGNAL(clicked()), signalMapperCheck, SLOT(map()));
 
 
         /* Important Button */
@@ -257,11 +331,11 @@ void MainWindow::showList(QListWidgetItem* item){
         QPushButton* btn_delete = new QPushButton();
         signalMapperDel->setMapping(btn_delete, item->itemID);
         connect(btn_delete, SIGNAL(clicked()), signalMapperDel, SLOT(map()));
-        btn_delete->setCheckable(false);
+        btn_delete->setChecked(true);
 
         QIcon ico_delete;
         ico_delete.addFile(":/new/IconsHome/Icons/delete_on.png",QSize(Icon_Size,Icon_Size),QIcon::Normal,QIcon::On);
-        ico_delete.addFile(":/new/IconsHome/Icons/delete_off.png",QSize(Icon_Size,Icon_Size),QIcon::Normal,QIcon::Off);
+        ico_delete.addFile(":/new/IconsHome/Icons/delete_on.png",QSize(Icon_Size,Icon_Size),QIcon::Normal,QIcon::Off);
 
         btn_delete->setIcon(ico_delete);
         btn_delete->setFlat(true);
@@ -269,7 +343,7 @@ void MainWindow::showList(QListWidgetItem* item){
 
 
         /* Setting Widget In Table*/
-        ui->listItemTable->setItem(i,0,checkBoxItem);
+        ui->listItemTable->setCellWidget(i,0,checkBoxItem);
         ui->listItemTable->setItem(i,1,tableItem);
         ui->listItemTable->setCellWidget(i,2,btn_pin);
         ui->listItemTable->setCellWidget(i,3,btn_important);
@@ -280,26 +354,6 @@ void MainWindow::showList(QListWidgetItem* item){
     ui->listItemTable->show();
 }
 
-void MainWindow::showLists(vector<List*> lists){
-
-    ui->listLists->clear();
-
-    for(int i = 0; i < lists.size(); i++){
-        List* list = lists[i];
-
-        QVariant qv;
-        qv.setValue(list);
-
-        QListWidgetItem * item = new QListWidgetItem;
-        item->setText(QString::fromStdString(list->description));
-        vector<string> rgb = split(list->color,",");
-        item->setBackgroundColor(QColor(stoi(rgb[0]),stoi(rgb[1]),stoi(rgb[2]),255));
-        item->setData(Qt::UserRole,qv);
-
-        ui->listLists->addItem(item);
-    }
-}
-
 void MainWindow::on_deconnexionAction_triggered()
 {
     cout << "Déconnexion" << endl;
@@ -307,7 +361,6 @@ void MainWindow::on_deconnexionAction_triggered()
 
 void MainWindow::on_refreshAction_triggered()
 {
-    cout << "Refreshing" << endl;
     this->refresh();
 }
 
@@ -316,9 +369,9 @@ void MainWindow::on_partageAction_triggered()
     SharingDialog sharing;
     sharing.setModal(true);
     sharing.setPermissions(actualList->listPermission);
-    if(sharing.exec()){
+    sharing.exec();
 
-    }
+    actualList->listPermission = sharing.getPermissions();
 }
 
 void MainWindow::on_actionNew_triggered()
@@ -358,6 +411,17 @@ void MainWindow::on_actionEdit_triggered()
         editingList->description = editedList->description;
         editingList->color = editedList->color;
 
+        this->refresh();
+    }
+}
+
+void MainWindow::on_btn_add_item_clicked()
+{
+    AddItemDialog itemDialog;
+    itemDialog.setModal(true);
+    if(itemDialog.exec()){
+        Item* newItem = itemDialog.getItem();
+        actualList->listItem.push_back(newItem);
         this->refresh();
     }
 }

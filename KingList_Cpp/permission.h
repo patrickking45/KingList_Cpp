@@ -16,6 +16,11 @@ public:
      Permission(){}
      Permission(int,int,bool,bool,bool,bool);
      Permission(int,bool,bool,bool,bool);
+
+     void setCheck();
+     void setWrite();
+     void setDelete();
+     void setShare();
 };
 inline Permission::Permission(int _permID, int _userID, bool _canCheck, bool _canWrite, bool _canDelete, bool _canShare)
 {
@@ -34,6 +39,22 @@ inline Permission::Permission(int _userID, bool _canCheck, bool _canWrite, bool 
     this->canCheck = _canCheck;
     this->canDelete = _canDelete;
     this->canShare = _canShare;
+}
+
+inline void Permission::setCheck(){
+    this->canCheck = (this->canCheck)? false:true;
+}
+
+inline void Permission::setWrite(){
+    this->canWrite = (this->canWrite)? false:true;
+}
+
+inline void Permission::setDelete(){
+    this->canDelete = (this->canDelete)? false:true;
+}
+
+inline void Permission::setShare(){
+    this->canShare = (this->canShare)? false:true;
 }
 
 Q_DECLARE_METATYPE(Permission*)

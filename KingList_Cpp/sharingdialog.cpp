@@ -5,6 +5,8 @@
 #include <QPushButton>
 #include <iostream>
 
+#include "invitedialog.h"
+
 using namespace std;
 
 vector<Permission*> listPermissions;
@@ -19,7 +21,6 @@ SharingDialog::SharingDialog(QWidget *parent) :
 }
 
 void SharingDialog::showShares(){
-    cout << listPermissions.size() << endl;
     QTableWidgetItem *tableItem = 0;
     int Icon_Size = 50;
 
@@ -75,7 +76,7 @@ void SharingDialog::showShares(){
 
         /* Can Check Button */
         QPushButton* btn_can_check = new QPushButton();
-        signalMapperCanCheck->setMapping(btn_can_check, perm->userID);
+        signalMapperCanCheck->setMapping(btn_can_check, perm->permID);
         connect(btn_can_check, SIGNAL(clicked()), signalMapperCanCheck, SLOT(map()));
         btn_can_check->setCheckable(true);
         btn_can_check->setChecked(canCheck);
@@ -91,7 +92,7 @@ void SharingDialog::showShares(){
 
         /* Can Write Button */
         QPushButton* btn_can_write = new QPushButton();
-        signalMapperCanWrite->setMapping(btn_can_write, perm->userID);
+        signalMapperCanWrite->setMapping(btn_can_write, perm->permID);
         connect(btn_can_write, SIGNAL(clicked()), signalMapperCanWrite, SLOT(map()));
         btn_can_write->setCheckable(true);
         btn_can_write->setChecked(canWrite);
@@ -107,7 +108,7 @@ void SharingDialog::showShares(){
 
         /* Can Delete Button */
         QPushButton* btn_can_delete = new QPushButton();
-        signalMapperCanDelete->setMapping(btn_can_delete, perm->userID);
+        signalMapperCanDelete->setMapping(btn_can_delete, perm->permID);
         connect(btn_can_delete, SIGNAL(clicked()), signalMapperCanDelete, SLOT(map()));
         btn_can_delete->setCheckable(true);
         btn_can_delete->setChecked(canDelete);
@@ -123,7 +124,7 @@ void SharingDialog::showShares(){
 
         /* Can Share Button */
         QPushButton* btn_can_share = new QPushButton();
-        signalMapperCanShare->setMapping(btn_can_share, perm->userID);
+        signalMapperCanShare->setMapping(btn_can_share, perm->permID);
         connect(btn_can_share, SIGNAL(clicked()), signalMapperCanShare, SLOT(map()));
         btn_can_share->setCheckable(true);
         btn_can_share->setChecked(canShare);
@@ -138,7 +139,7 @@ void SharingDialog::showShares(){
 
         /* Unshare Button */
         QPushButton* btn_unshare = new QPushButton();
-        signalMapperUnShare->setMapping(btn_unshare, perm->userID);
+        signalMapperUnShare->setMapping(btn_unshare, perm->permID);
         connect(btn_unshare, SIGNAL(clicked()), signalMapperUnShare, SLOT(map()));
 
         QIcon ico_unshare;
@@ -162,6 +163,19 @@ void SharingDialog::showShares(){
     ui->sharingTable->show();
 }
 
+vector<Permission*> SharingDialog::getPermissions(){
+    return listPermissions;
+}
+
+Permission* SharingDialog::getPermissionById(int id){
+    for(int i = 0; i<listPermissions.size(); i++){
+        if(listPermissions[i]->permID == id){
+            return listPermissions[i];
+        }
+    }
+    return NULL;
+}
+
 SharingDialog::~SharingDialog()
 {
     delete ui;
@@ -172,13 +186,34 @@ void SharingDialog::setPermissions(vector<Permission*> perms){
     this->showShares();
 }
 
-void SharingDialog::clickedCheck(int buttonId){}
+void SharingDialog::clickedCheck(int buttonId){
+    this->getPermissionById(buttonId)->setCheck();
+}
 
-void SharingDialog::clickedWrite(int buttonId){}
+void SharingDialog::clickedWrite(int buttonId){
+    this->getPermissionById(buttonId)->setWrite();
+}
 
-void SharingDialog::clickedDelete(int buttonId){}
+void SharingDialog::clickedDelete(int buttonId){
+    this->getPermissionById(buttonId)->setDelete();
+}
 
-void SharingDialog::clickedShare(int buttonId){}
+void SharingDialog::clickedShare(int buttonId){
+    this->getPermissionById(buttonId)->setShare();
+}
 
-void SharingDialog::clickedUnShare(int buttonId){}
+void SharingDialog::clickedUnShare(int buttonId){
+    listPermissions.erase(remove(listPermissions.begin(), listPermissions.end(), this->getPermissionById(buttonId)),listPermissions.end());
+    this->showShares();
+}
 
+void SharingDialog::on_pushButton_clicked()
+{
+    InviteDialog inviteDialog;
+    inviteDialog.setModal(true);
+    if(inviteDialog.exec()){
+        listPermissions.push_back(inviteDialog.getPermission());
+    }
+
+    this->showShares();
+}

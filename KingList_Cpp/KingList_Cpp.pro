@@ -26,7 +26,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
     newlistdialog.cpp \
         mainwindow.cpp \
-    sharingdialog.cpp
+    sharingdialog.cpp \
+    invitedialog.cpp \
+    additemdialog.cpp
 
 HEADERS  += mainwindow.h \
     permission.h \
@@ -34,11 +36,15 @@ HEADERS  += mainwindow.h \
     liste.h \
     item.h \
     newlistdialog.h \
-    sharingdialog.h
+    sharingdialog.h \
+    invitedialog.h \
+    additemdialog.h
 
 FORMS    += mainwindow.ui \
     newlistdialog.ui \
-    sharingdialog.ui
+    sharingdialog.ui \
+    invitedialog.ui \
+    additemdialog.ui
 
 RESOURCES += \
     resources.qrc

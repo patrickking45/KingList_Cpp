@@ -20,10 +20,12 @@ public:
     ~MainWindow();
 
     void showLists(vector<List*>);
+    void showItems(vector<Item*>);
     void refresh();
 
 public slots:
     void showList(QListWidgetItem*);
+    void clickedCheck(int buttonId);
     void clickedPin(int buttonId);
     void clickedFav(int buttonId);
     void clickedImg(int buttonId);
@@ -38,6 +40,8 @@ private slots:
     void on_actionDelete_triggered();
 
     void on_actionEdit_triggered();
+
+    void on_btn_add_item_clicked();
 
 private:
     Ui::MainWindow *ui;
