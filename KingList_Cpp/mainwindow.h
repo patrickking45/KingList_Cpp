@@ -20,6 +20,7 @@ public:
     ~MainWindow();
 
     void showLists(vector<List*>);
+    void refresh();
 
 public slots:
     void showList(QListWidgetItem*);
@@ -28,6 +29,7 @@ public slots:
     void clickedImg(int buttonId);
     void clickedDel(int buttonId);
     void on_deconnexionAction_triggered();
+    void on_partageAction_triggered();
     void on_refreshAction_triggered();
 
 private slots:

@@ -6,11 +6,13 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <newlistdialog.h>
+#include <sharingdialog.h>
 
 using namespace std;
 
 List* actualList;
 static vector<List*> listOfLists;
+QAction* sharing;
 
 
 inline vector<string> split(string str, string sep){
@@ -35,6 +37,12 @@ vector<List*> testInit(){
     items.push_back(new Item(11, 154887, "Spaghetti", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, true, true));
     items.push_back(new Item(12, 154887, "Burrito", QDate(2017,04,18), QDate(1,1,1), false, QDate(1,1,1), false, false, true));
     items.push_back(new Item(13, 154887, "Pizza", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, true, false));
+
+    permissions.push_back(new Permission(332, 101, true, true, true, true));
+    permissions.push_back(new Permission(333, 102, true, false, true, false));
+    permissions.push_back(new Permission(334, 103, true, true, false, true));
+    permissions.push_back(new Permission(335, 104, true, false, true, true));
+    permissions.push_back(new Permission(336, 115, true, false, false, false));
 
     listOfLists.push_back(new List(1,items,permissions,"96,69,42","Épicerie",QDate(2017,04,18),QDate(1,1,1), false));
 
@@ -85,6 +93,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     //Adding Actions
+    sharing = new QAction(tr("&Partage"), this);
+    sharing->setVisible(false);
+    ui->menuBar->addAction(sharing);
+
     QAction* deco = new QAction(tr("&Déconnexion"), this);
     ui->menuBar->addAction(deco);
 
@@ -93,6 +105,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->menuBar->addAction(refresh);
 
     connect(deco, SIGNAL(triggered(bool)), this, SLOT(on_deconnexionAction_triggered()));
+    connect(sharing, SIGNAL(triggered(bool)), this, SLOT(on_partageAction_triggered()));
     connect(refresh, SIGNAL(triggered(bool)), this, SLOT(on_refreshAction_triggered()));
 
     vector<List*> initLists = getUserLists();
@@ -126,6 +139,10 @@ void MainWindow::clickedDel(int id){
     actualList->getItem(id)->del();
 }
 
+void MainWindow::refresh(){
+    this->showLists(listOfLists);
+}
+
 void MainWindow::showList(QListWidgetItem* item){
     List* list = item->data(Qt::UserRole).value<List*>();
     QTableWidgetItem *tableItem = 0;
@@ -135,6 +152,7 @@ void MainWindow::showList(QListWidgetItem* item){
     actualList = list;
     ui->actionEdit->setVisible(true);
     ui->actionDelete->setVisible(true);
+    sharing->setVisible(true );
 
     ui->listItemTable->clear();
     ui->listItemTable->horizontalHeader()->hide();
@@ -290,7 +308,17 @@ void MainWindow::on_deconnexionAction_triggered()
 void MainWindow::on_refreshAction_triggered()
 {
     cout << "Refreshing" << endl;
-    this->showLists(listOfLists);
+    this->refresh();
+}
+
+void MainWindow::on_partageAction_triggered()
+{
+    SharingDialog sharing;
+    sharing.setModal(true);
+    sharing.setPermissions(actualList->listPermission);
+    if(sharing.exec()){
+
+    }
 }
 
 void MainWindow::on_actionNew_triggered()
@@ -300,7 +328,7 @@ void MainWindow::on_actionNew_triggered()
     if(newListDialog.exec()){
         List* newList = newListDialog.getList();
         listOfLists.push_back(newList);
-        this->showLists(listOfLists);
+        this->refresh();
     }
 }
 
@@ -315,7 +343,7 @@ void MainWindow::on_actionDelete_triggered()
         listOfLists.erase(remove(listOfLists.begin(), listOfLists.end(), actualList),listOfLists.end());
     }
 
-    this->on_refreshAction_triggered();
+    this->refresh();
 }
 
 void MainWindow::on_actionEdit_triggered()
@@ -330,6 +358,6 @@ void MainWindow::on_actionEdit_triggered()
         editingList->description = editedList->description;
         editingList->color = editedList->color;
 
-        this->showLists(listOfLists);
+        this->refresh();
     }
 }

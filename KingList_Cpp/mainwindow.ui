@@ -76,13 +76,7 @@
     <addaction name="actionEdit"/>
     <addaction name="actionDelete"/>
    </widget>
-   <widget class="QMenu" name="menuPartage">
-    <property name="title">
-     <string>Partage</string>
-    </property>
-   </widget>
    <addaction name="menuListe"/>
-   <addaction name="menuPartage"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionEdit">

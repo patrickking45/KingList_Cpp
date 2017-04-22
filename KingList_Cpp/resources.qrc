@@ -10,4 +10,16 @@
         <file>Icons/pin_on.png</file>
         <file>Icons/refresh.png</file>
     </qresource>
+    <qresource prefix="/new/IconsSharing">
+        <file>Icons/Sharing/check_off.png</file>
+        <file>Icons/Sharing/check_on.png</file>
+        <file>Icons/Sharing/delete_off.png</file>
+        <file>Icons/Sharing/delete_on.png</file>
+        <file>Icons/Sharing/remove_off.png</file>
+        <file>Icons/Sharing/remove_on.png</file>
+        <file>Icons/Sharing/share_off.png</file>
+        <file>Icons/Sharing/share_on.png</file>
+        <file>Icons/Sharing/write_off.png</file>
+        <file>Icons/Sharing/write_on.png</file>
+    </qresource>
 </RCC>
