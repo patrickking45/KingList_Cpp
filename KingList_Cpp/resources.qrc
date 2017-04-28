@@ -22,4 +22,8 @@
         <file>Icons/Sharing/write_off.png</file>
         <file>Icons/Sharing/write_on.png</file>
     </qresource>
+    <qresource prefix="/new/Logo">
+        <file>Icons/Logo/KingList-Logo.png</file>
+        <file>Icons/Logo/KingList-Splash.png</file>
+    </qresource>
 </RCC>

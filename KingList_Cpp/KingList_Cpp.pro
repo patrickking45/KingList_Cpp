@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -24,30 +24,47 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-    newlistdialog.cpp \
         mainwindow.cpp \
-    sharingdialog.cpp \
-    invitedialog.cpp \
-    additemdialog.cpp \
-    displayimagedialog.cpp
+    utility.cpp \
+    DialogConnection.cpp \
+    DialogAddItem.cpp \
+    DialogDisplayImage.cpp \
+    DialogInvite.cpp \
+    DialogNewList.cpp \
+    DialogSharing.cpp \
+    ServicesItem.cpp \
+    ServicesList.cpp \
+    ServicesPermission.cpp \
+    ServicesUser.cpp \
+    DialogRegister.cpp
 
 HEADERS  += mainwindow.h \
-    permission.h \
-    user.h \
-    liste.h \
-    item.h \
-    newlistdialog.h \
-    sharingdialog.h \
-    invitedialog.h \
-    additemdialog.h \
-    displayimagedialog.h
+    dialog_connection.h \
+    dialog_additem.h \
+    dialog_displayimage.h \
+    dialog_invite.h \
+    dialog_newlist.h \
+    dialog_sharing.h \
+    services_item.h \
+    services_list.h \
+    services_permission.h \
+    services_user.h \
+    model_user.h \
+    model_permission.h \
+    model_item.h \
+    model_liste.h \
+    util_repository.h \
+    util_preferences.h \
+    dialog_register.h
 
 FORMS    += mainwindow.ui \
-    newlistdialog.ui \
-    sharingdialog.ui \
-    invitedialog.ui \
-    additemdialog.ui \
-    displayimagedialog.ui
+    dialog_connection.ui \
+    dialog_additem.ui \
+    dialog_displayimage.ui \
+    dialog_invite.ui \
+    dialog_newlist.ui \
+    dialog_sharing.ui \
+    dialog_register.ui
 
 RESOURCES += \
     resources.qrc

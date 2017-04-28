@@ -15,6 +15,7 @@ public:
     explicit DisplayImageDialog(QWidget *parent = 0);
     ~DisplayImageDialog();
     void setImage(QPixmap);
+    void setDelPermission(bool);
 
 private slots:
     void on_pushButton_clicked();

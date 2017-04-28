@@ -2,7 +2,7 @@
 #define ADDITEMDIALOG_H
 
 #include <QDialog>
-#include <item.h>
+#include <model_item.h>
 
 namespace Ui {
 class AddItemDialog;

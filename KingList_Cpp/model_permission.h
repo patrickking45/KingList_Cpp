@@ -7,6 +7,7 @@ class Permission
 {
 public:
     int userID;
+    int listID;
     int permID;
     bool canWrite;
     bool canCheck;
@@ -14,15 +15,15 @@ public:
     bool canShare;
 
      Permission(){}
+     Permission(int,int,int,bool,bool,bool,bool);
      Permission(int,int,bool,bool,bool,bool);
-     Permission(int,bool,bool,bool,bool);
 
      void setCheck();
      void setWrite();
      void setDelete();
      void setShare();
 };
-inline Permission::Permission(int _permID, int _userID, bool _canCheck, bool _canWrite, bool _canDelete, bool _canShare)
+inline Permission::Permission(int _permID, int _userID,int _listID, bool _canCheck, bool _canWrite, bool _canDelete, bool _canShare)
 {
     this->permID = _permID;
     this->userID = _userID;
@@ -32,9 +33,10 @@ inline Permission::Permission(int _permID, int _userID, bool _canCheck, bool _ca
     this->canShare = _canShare;
 }
 
-inline Permission::Permission(int _userID, bool _canCheck, bool _canWrite, bool _canDelete, bool _canShare)
+inline Permission::Permission(int _userID, int _listID, bool _canCheck, bool _canWrite, bool _canDelete, bool _canShare)
 {
     this->userID = _userID;
+    this->listID = _listID;
     this->canWrite = _canWrite;
     this->canCheck = _canCheck;
     this->canDelete = _canDelete;

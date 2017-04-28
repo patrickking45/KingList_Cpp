@@ -1,22 +1,33 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "liste.h"
+#include "model_liste.h"
+#include "model_user.h"
+#include "utility.cpp"
+#include "util_repository.h"
+
 #include <QSignalMapper>
 #include <QPushButton>
 #include <QCheckBox>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QLabel>
-#include <newlistdialog.h>
-#include <sharingdialog.h>
-#include <additemdialog.h>
-#include <displayimagedialog.h>
+#include <dialog_newlist.h>
+#include <dialog_sharing.h>
+#include <dialog_additem.h>
+#include <dialog_connection.h>
+#include <dialog_displayimage.h>
+#include <dialog_register.h>
 
 using namespace std;
 
 List* actualList;
+Repository repo = Repository();
 static vector<List*> listOfLists;
 QAction* sharing;
+QAction* connexion;
+QAction* deco;
+QAction* reg;
+User* connectedUser;
 
 struct isImportant{
     inline bool operator() (const Item* item1, const Item* item2){
@@ -24,80 +35,10 @@ struct isImportant{
     }
 };
 
-inline vector<string> split(string str, string sep){
-    char* cstr=const_cast<char*>(str.c_str());
-    char* current;
-    vector<string> arr;
-    current=strtok(cstr,sep.c_str());
-    while(current != NULL){
-        arr.push_back(current);
-        current=strtok(NULL,sep.c_str());
-    }
-    return arr;
-}
-
-vector<List*> testInit(){
-
-    listOfLists.clear();
-
-    vector<Item*> items;
-    vector<Permission*> permissions;
-
-    items.push_back(new Item(11, 154887, "Spaghetti", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, true, true));
-    items.push_back(new Item(12, 154887, "Burrito", QDate(2017,04,18), QDate(1,1,1), false, QDate(1,1,1), false, false, true));
-    items.push_back(new Item(13, 154887, "Pizza", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, true, false));
-
-    permissions.push_back(new Permission(332, 101, true, true, true, true));
-    permissions.push_back(new Permission(333, 102, true, false, true, false));
-    permissions.push_back(new Permission(334, 103, true, true, false, true));
-    permissions.push_back(new Permission(335, 104, true, false, true, true));
-    permissions.push_back(new Permission(336, 115, true, false, false, false));
-
-    listOfLists.push_back(new List(1,1,items,permissions,"96,69,42","Épicerie",QDate(2017,04,18),QDate(1,1,1), false));
-
-    items.clear();
-    items.push_back(new Item(21, 154887, "John Wick 2", QDate(2017,04,18), QDate(1,1,1), false, QDate(1,1,1), false, false, true));
-    items.push_back(new Item(22, 154887, "Guardians of The Galaxy 2", QDate(2017,04,18), QDate(1,1,1), false, QDate(1,1,1), false, true, false));
-    items.push_back(new Item(23, 154887, "Thor: Ragnarok", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, true, true));
-    items.push_back(new Item(24, 154887, "Histoire de Jouet 3", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, false, false));
-
-    permissions.clear();
-    permissions.push_back(new Permission(334, 103, true, true, false, true));
-    permissions.push_back(new Permission(335, 104, true, false, true, true));
-    permissions.push_back(new Permission(336, 115, true, false, false, false));
-
-    listOfLists.push_back(new List(2,2,items,permissions,"255,250,240","Films",QDate(2017,04,18),QDate(1,1,1), false));
-
-    items.clear();
-    items.push_back(new Item(31, 154887, "Android", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, false, false));
-    items.push_back(new Item(32, 154887, "Linux", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, true, false));
-    items.push_back(new Item(33, 154887, "C++", QDate(2017,04,18), QDate(1,1,1), false, QDate(1,1,1), false, true, false));
-    items.push_back(new Item(34, 154887, "Angular", QDate(2017,04,18), QDate(1,1,1), false, QDate(1,1,1), false, false, true));
-    items.push_back(new Item(35, 154887, "Java EE", QDate(2017,04,18), QDate(2017,04,18), true, QDate(1,1,1), false, true, false));
-
-    permissions.clear();
-
-    listOfLists.push_back(new List(3,3,items,permissions,"200,169,113","Devoir",QDate(2017,04,18),QDate(1,1,1), false));
-
-    items.clear();
-
-    permissions.clear();
-
-    listOfLists.push_back(new List(4,4,items,permissions,"100,150,225","To Do",QDate(2017,04,18),QDate(1,1,1), false));
-
-    return listOfLists;
-
-}
-
-vector<List*> getUserLists(){
-    //Call WebServices
-    return testInit();
-}
-
 List* getListById(int id){
     for(int i = 0 ; i < listOfLists.size(); i++){
         if(listOfLists[i]->listID == id){
-            cout << listOfLists[i]->description << endl;
+            cout << "hey" << listOfLists[i]->description.toStdString() << endl;
             return listOfLists[i];
         }
     }
@@ -108,27 +49,43 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
     {
+    //ToRemove
+    repo.Init();
+
     ui->setupUi(this);
+
+    this->setFixedSize(this->size());
+    this->setWindowTitle("KingList");
+    this->setWindowIcon(QIcon(":/new/Logo/Icons/Logo/KingList-Logo.png"));
 
     //Adding Actions
     sharing = new QAction(tr("&Partage"), this);
     sharing->setVisible(false);
     ui->menuBar->addAction(sharing);
 
-    QAction* deco = new QAction(tr("&Déconnexion"), this);
+    deco = new QAction(tr("&Déconnexion"), this);
     ui->menuBar->addAction(deco);
+    deco->setVisible(false);
+
+    connexion = new QAction(tr("&Connexion"), this);
+    ui->menuBar->addAction(connexion);
+
+    reg = new QAction(tr("&Register"), this);
+    ui->menuBar->addAction(reg);
 
     QAction* refresh = new QAction(tr("&Refresh"), this);
     refresh->setIcon(QIcon(":/new/IconsHome/Icons/refresh.png"));
     ui->menuBar->addAction(refresh);
 
+    ui->menuListe->menuAction()->setVisible(false);
+
+    connect(connexion, SIGNAL(triggered(bool)), this, SLOT(on_connexionAction_triggered()));
     connect(deco, SIGNAL(triggered(bool)), this, SLOT(on_deconnexionAction_triggered()));
+    connect(reg, SIGNAL(triggered(bool)), this, SLOT(on_registerAction_triggered()));
     connect(sharing, SIGNAL(triggered(bool)), this, SLOT(on_partageAction_triggered()));
     connect(refresh, SIGNAL(triggered(bool)), this, SLOT(on_refreshAction_triggered()));
 
-    vector<List*> initLists = getUserLists();
-
-    this->showLists(initLists);
+    this->refresh();
     }
 
 MainWindow::~MainWindow()
@@ -137,18 +94,26 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::clickedCheck(int id){
-    cout << "Clicked Check :" << actualList->getItem(id)->title << endl;
-    actualList->getItem(id)->setCheck();
+    if(actualList->getItem(id)){
+        actualList->getItem(id)->setCheck();
+        repo.saveItem(actualList->getItem(id));
+    }
+    this->refresh();
 }
 
 void MainWindow::clickedPin(int id){
-    cout << "Clicked Pin :" << actualList->getItem(id)->title << endl;
-    actualList->getItem(id)->setPin();
+    if(actualList->getItem(id)){
+        actualList->getItem(id)->setPin();
+        repo.saveItem(actualList->getItem(id));
+    }
+    this->refresh();
 }
 
 void MainWindow::clickedFav(int id){
-    cout << "Clicked Fav :" << actualList->getItem(id)->title << endl;
-    actualList->getItem(id)->setFav();
+    if(actualList->getItem(id)){
+        actualList->getItem(id)->setFav();
+        repo.saveItem(actualList->getItem(id));
+    }
     this->refresh();
 }
 
@@ -156,34 +121,53 @@ void MainWindow::clickedImg(int id){
 
     Item* item = actualList->getItem(id);
 
-    if(!item->image.isNull()){
-        DisplayImageDialog imageDialog;
-        imageDialog.setModal(true);
-        imageDialog.setImage(item->image);
-        if(imageDialog.exec() == 2){
-            item->image = QPixmap();
-            this->refresh();
-        }
-    }
-    else{
-        QFileDialog uploadImage(this);
-        uploadImage.setNameFilter(tr("Images (*.png *.jpg *.jpeg)"));
-        uploadImage.setViewMode(QFileDialog::Detail);
-        QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "C:/", tr("Images (*.png *.jpg *.jpeg)"));
-        actualList->getItem(id)->image = QPixmap(fileName);
+    if(item){
+        if(!item->image.isNull()){
+            DisplayImageDialog imageDialog;
+            imageDialog.setModal(true);
+            imageDialog.setDelPermission(actualList->UserCanWrite(connectedUser->userID));
+            imageDialog.setImage(item->image);
 
-        this->refresh();
+            if(imageDialog.exec() == 2){ //Delete image
+                item->deleteImage();
+
+                repo.saveItem(item);
+                this->refresh();
+            }
+        }
+        else{
+            if(actualList->UserCanWrite(connectedUser->userID)){
+                QMessageBox confirmationBox;
+                confirmationBox.setText(QString("There is no image for this item, do you want to upload one now?"));
+                confirmationBox.setInformativeText(actualList->getItem(id)->title);
+                confirmationBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+
+                if(confirmationBox.exec() == QMessageBox::Yes){
+                    QFileDialog uploadImage(this);
+                    uploadImage.setNameFilter(tr("Images (*.png *.jpg *.jpeg)"));
+                    uploadImage.setViewMode(QFileDialog::Detail);
+                    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "C:/", tr("Images (*.png *.jpg *.jpeg)"));
+                    actualList->getItem(id)->image = QPixmap(fileName);
+
+                    repo.saveItem(item);
+                    this->refresh();
+                }
+            }
+        }
     }
 }
 
 void MainWindow::clickedDel(int id){
     QMessageBox confirmationBox;
     confirmationBox.setText(QString("Are you sure you want to delete this item?"));
-    confirmationBox.setInformativeText(QString::fromStdString(actualList->getItem(id)->title));
+    confirmationBox.setInformativeText(actualList->getItem(id)->title);
     confirmationBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 
     if(confirmationBox.exec() == QMessageBox::Ok){
-        actualList->listItem.erase(remove(actualList->listItem.begin(), actualList->listItem.end(), actualList->getItem(id)),actualList->listItem.end());
+        //actualList->listItem.erase(remove(actualList->listItem.begin(), actualList->listItem.end(), actualList->getItem(id)),actualList->listItem.end());
+        if(actualList->getItem(id)){
+            repo.deleteItem(actualList->getItem(id));
+        }
     }
 
     this->refresh();
@@ -191,6 +175,13 @@ void MainWindow::clickedDel(int id){
 
 void MainWindow::refresh(){
     List* refreshedList = new List();
+
+    if(connectedUser){
+        listOfLists = repo.getListOfUser(connectedUser->userID);
+    }
+    else{
+        listOfLists.clear();
+    }
 
     this->showLists(listOfLists);
 
@@ -202,18 +193,25 @@ void MainWindow::refresh(){
         }
         actualList = refreshedList;
 
+        if(actualList->listID == NULL){
+            ui->btn_add_item->setDisabled(true);
+        }
+
         this->showItems(actualList->listItem);
     }
 }
 
 void MainWindow::showList(QListWidgetItem* item){
     List* list = item->data(Qt::UserRole).value<List*>();
+    actualList = list;
+
     this->showItems(list->listItem);
 
-    actualList = list;
-    ui->actionEdit->setVisible(true);
-    ui->actionDelete->setVisible(true);
-    sharing->setVisible(true );
+    ui->actionEdit->setVisible(list->UserIsOwner(connectedUser->userID));
+    ui->actionDelete->setVisible(list->UserIsOwner(connectedUser->userID));
+    ui->btn_add_item->setEnabled(list->UserCanWrite(connectedUser->userID));
+
+    sharing->setVisible(list->UserCanWrite(connectedUser->userID));
 }
 
 void MainWindow::showLists(vector<List*> lists){
@@ -227,17 +225,15 @@ void MainWindow::showLists(vector<List*> lists){
         qv.setValue(list);
 
         QListWidgetItem * item = new QListWidgetItem;
-        item->setText(QString::fromStdString(list->description));
-        vector<string> rgb = split(list->color,",");
-        item->setBackgroundColor(QColor(stoi(rgb[0]),stoi(rgb[1]),stoi(rgb[2]),255));
-        item->setData(Qt::UserRole,qv);
+        item->setText(list->description);
 
+        item->setBackgroundColor(getQColorFromString(list->color.toStdString()));
+        item->setData(Qt::UserRole,qv);
         ui->listLists->addItem(item);
     }
 }
 
 void MainWindow::showItems(vector<Item*> items){
-
     sort(items.begin(), items.end(), isImportant());
 
     QTableWidgetItem *tableItem = 0;
@@ -290,12 +286,16 @@ void MainWindow::showItems(vector<Item*> items){
         qv.setValue(item);
 
         /* Item Name */
-        tableItem = new QTableWidgetItem(QString::fromStdString(item->title));
+        tableItem = new QTableWidgetItem(item->title);
+        tableItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+
 
         /* CheckBox */
-
         QCheckBox* checkBoxItem = new QCheckBox();
+        checkBoxItem->setCheckable(true);
         checkBoxItem->setCheckState(check);
+        checkBoxItem->setEnabled(actualList->UserCanCheck(connectedUser->userID));
+
         signalMapperCheck->setMapping(checkBoxItem, item->itemID);
         connect(checkBoxItem, SIGNAL(clicked()), signalMapperCheck, SLOT(map()));
 
@@ -306,6 +306,7 @@ void MainWindow::showItems(vector<Item*> items){
         connect(btn_important, SIGNAL(clicked()), signalMapperFav, SLOT(map()));
         btn_important->setCheckable(true);
         btn_important->setChecked(important);
+        btn_important->setEnabled(actualList->UserCanWrite(connectedUser->userID));
 
         QIcon ico_important;
         ico_important.addFile(":/new/IconsHome/Icons/important_on.png",QSize(Icon_Size,Icon_Size),QIcon::Normal,QIcon::On);
@@ -313,7 +314,7 @@ void MainWindow::showItems(vector<Item*> items){
 
         btn_important->setIcon(ico_important);
         btn_important->setFlat(true);
-        btn_important->setStyleSheet("QPushButton:checked { background:none; border: none; } QPushButton:pressed { background:none; border: none; }");
+        btn_important->setStyleSheet("QPushButton:checked { background:none; border: none; } QPushButton:pressed { background:none; border: none; } QPushButton:disabled{}");
 
 
         /* Pin Button */
@@ -322,6 +323,7 @@ void MainWindow::showItems(vector<Item*> items){
         connect(btn_pin, SIGNAL(clicked()), signalMapperPin, SLOT(map()));
         btn_pin->setCheckable(true);
         btn_pin->setChecked(pin);
+        btn_pin->setEnabled(actualList->UserCanPin(connectedUser->userID));
 
         QIcon ico_pin;
         ico_pin.addFile(":/new/IconsHome/Icons/pin_on.png",QSize(Icon_Size,Icon_Size),QIcon::Normal,QIcon::On);
@@ -337,7 +339,7 @@ void MainWindow::showItems(vector<Item*> items){
         signalMapperImg->setMapping(btn_image, item->itemID);
         connect(btn_image, SIGNAL(clicked()), signalMapperImg, SLOT(map()));
 
-        if(item->image.isNull()){
+        if(item->asImage()){
             btn_image->setIcon(QIcon(":/new/IconsHome/Icons/image_off.png"));
         }
         else{
@@ -352,7 +354,9 @@ void MainWindow::showItems(vector<Item*> items){
         QPushButton* btn_delete = new QPushButton();
         signalMapperDel->setMapping(btn_delete, item->itemID);
         connect(btn_delete, SIGNAL(clicked()), signalMapperDel, SLOT(map()));
-        btn_delete->setChecked(true);
+        btn_delete->setChecked(Qt::Checked);
+        btn_delete->setEnabled((actualList->UserCanDelete(connectedUser->userID) && item->isPinned == false) || actualList->UserIsOwner(connectedUser->userID));
+
 
         QIcon ico_delete;
         ico_delete.addFile(":/new/IconsHome/Icons/delete_on.png",QSize(Icon_Size,Icon_Size),QIcon::Normal,QIcon::On);
@@ -375,9 +379,39 @@ void MainWindow::showItems(vector<Item*> items){
     ui->listItemTable->show();
 }
 
+void MainWindow::on_connexionAction_triggered()
+{
+    ConnectionDialog connection;
+    connection.setModal(true);
+    if(connection.exec()){
+        //Add Connection System
+        connectedUser = connection.getUser();
+        connexion->setVisible(false);
+        reg->setVisible(false);
+        deco->setVisible(true);
+        ui->menuListe->menuAction()->setVisible(true);
+    }
+
+    this->refresh();
+}
+
 void MainWindow::on_deconnexionAction_triggered()
 {
-    cout << "Déconnexion" << endl;
+    connectedUser = NULL;
+    connexion->setVisible(true);
+    reg->setVisible(true);
+    deco->setVisible(false);
+    sharing->setVisible(false);
+    ui->menuListe->menuAction()->setVisible(true);
+
+    this->refresh();
+}
+
+void MainWindow::on_registerAction_triggered()
+{
+    DialogRegister dialogRegister;
+    dialogRegister.setModal(true);
+    dialogRegister.exec();
 }
 
 void MainWindow::on_refreshAction_triggered()
@@ -389,7 +423,7 @@ void MainWindow::on_partageAction_triggered()
 {
     SharingDialog sharing;
     sharing.setModal(true);
-    sharing.setPermissions(actualList->listPermission);
+    sharing.setPermissions(actualList->listPermission, actualList->listID);
     sharing.exec();
 
     actualList->listPermission = sharing.getPermissions();
@@ -401,7 +435,8 @@ void MainWindow::on_actionNew_triggered()
     newListDialog.setModal(true);
     if(newListDialog.exec()){
         List* newList = newListDialog.getList();
-        listOfLists.push_back(newList);
+        newList->userID = connectedUser->userID;
+        repo.createList(newList);
         this->refresh();
     }
 }
@@ -410,11 +445,12 @@ void MainWindow::on_actionDelete_triggered()
 {
     QMessageBox confirmationBox;
     confirmationBox.setText(QString("Are you sure you want to delete this list?"));
-    confirmationBox.setInformativeText(QString::fromStdString(actualList->description));
+    confirmationBox.setInformativeText(actualList->description);
     confirmationBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 
     if(confirmationBox.exec() == QMessageBox::Ok){
         listOfLists.erase(remove(listOfLists.begin(), listOfLists.end(), actualList),listOfLists.end());
+        repo.deleteList(actualList);
     }
 
     this->refresh();
@@ -426,11 +462,12 @@ void MainWindow::on_actionEdit_triggered()
     editListDialog.setModal(true);
     editListDialog.setData(actualList);
     if(editListDialog.exec()){
-        List* editingList = getListById(actualList->listID);
         List* editedList = editListDialog.getList();
 
-        editingList->description = editedList->description;
-        editingList->color = editedList->color;
+        actualList->description = editedList->description;
+        actualList->color = editedList->color;
+
+        repo.saveList(actualList);
 
         this->refresh();
     }
@@ -442,7 +479,9 @@ void MainWindow::on_btn_add_item_clicked()
     itemDialog.setModal(true);
     if(itemDialog.exec()){
         Item* newItem = itemDialog.getItem();
-        actualList->listItem.push_back(newItem);
+        newItem->listID = actualList->listID;
+        newItem->userID = connectedUser->userID;
+        repo.createItem(newItem);
         this->refresh();
     }
 }

@@ -58,6 +58,9 @@
     </property>
    </widget>
    <widget class="QPushButton" name="btn_add_item">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>430</x>

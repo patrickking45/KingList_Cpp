@@ -1,21 +1,31 @@
-#include "sharingdialog.h"
-#include "ui_sharingdialog.h"
+#include "dialog_sharing.h"
+#include "ui_dialog_sharing.h"
 
 #include <QSignalMapper>
 #include <QPushButton>
 #include <iostream>
+#include <QMessageBox>
+#include <QLayout>
 
-#include "invitedialog.h"
+#include "dialog_invite.h"
+#include "util_repository.h"
 
 using namespace std;
 
 vector<Permission*> listPermissions;
+Repository* repo = new Repository();
+int listID;
 
 SharingDialog::SharingDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SharingDialog)
 {
     ui->setupUi(this);
+
+    this->setFixedSize(this->size());
+    this->setWindowTitle("Sharing");
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    this->setWindowIcon(QIcon(":/new/Logo/Icons/Logo/KingList-Logo.png"));
 
     this->showShares();
 }
@@ -72,7 +82,13 @@ void SharingDialog::showShares(){
         qv.setValue(perm);
 
         /* Item Name */
-        tableItem = new QTableWidgetItem(QString::fromStdString(to_string(perm->userID)));
+        User* user = repo->getUserById(perm->userID);
+        if(user){
+            tableItem = new QTableWidgetItem(user->getLogin());
+        }
+        else{
+            tableItem = new QTableWidgetItem("UNKNOWN");
+        }
 
         /* Can Check Button */
         QPushButton* btn_can_check = new QPushButton();
@@ -181,30 +197,42 @@ SharingDialog::~SharingDialog()
     delete ui;
 }
 
-void SharingDialog::setPermissions(vector<Permission*> perms){
+void SharingDialog::setPermissions(vector<Permission*> perms, int _listID){
     listPermissions = perms;
+    listID = _listID;
     this->showShares();
 }
 
 void SharingDialog::clickedCheck(int buttonId){
     this->getPermissionById(buttonId)->setCheck();
+    repo->savePermission(this->getPermissionById(buttonId));
 }
 
 void SharingDialog::clickedWrite(int buttonId){
     this->getPermissionById(buttonId)->setWrite();
+    repo->savePermission(this->getPermissionById(buttonId));
 }
 
 void SharingDialog::clickedDelete(int buttonId){
     this->getPermissionById(buttonId)->setDelete();
+    repo->savePermission(this->getPermissionById(buttonId));
 }
 
 void SharingDialog::clickedShare(int buttonId){
     this->getPermissionById(buttonId)->setShare();
+    repo->savePermission(this->getPermissionById(buttonId));
 }
 
 void SharingDialog::clickedUnShare(int buttonId){
-    listPermissions.erase(remove(listPermissions.begin(), listPermissions.end(), this->getPermissionById(buttonId)),listPermissions.end());
-    this->showShares();
+    QMessageBox confirmationBox;
+    confirmationBox.setText(QString("Are you sure you want to stop sharing with this user?"));
+    confirmationBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+
+    if(confirmationBox.exec() == QMessageBox::Yes){
+        repo->deletePermission(this->getPermissionById(buttonId));
+        listPermissions.erase(remove(listPermissions.begin(), listPermissions.end(), this->getPermissionById(buttonId)),listPermissions.end());
+        this->showShares();
+    }
 }
 
 void SharingDialog::on_pushButton_clicked()
@@ -212,7 +240,10 @@ void SharingDialog::on_pushButton_clicked()
     InviteDialog inviteDialog;
     inviteDialog.setModal(true);
     if(inviteDialog.exec()){
-        listPermissions.push_back(inviteDialog.getPermission());
+        Permission* newPerm = inviteDialog.getPermission();
+        newPerm->listID=listID;
+        listPermissions.push_back(newPerm);
+        repo->createPermission(newPerm);
     }
 
     this->showShares();

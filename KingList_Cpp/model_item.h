@@ -3,6 +3,7 @@
 #include <QString>
 #include <QDate>
 #include <QMetaType>
+#include <QPixmap>
 #include <iostream>
 
 using namespace std;
@@ -12,7 +13,8 @@ class Item
 public:
     int itemID;
     int userID;
-    string title;
+    int listID;
+    QString title;
     QPixmap image;
     QDate createDate;
     QDate checkDate;
@@ -21,10 +23,12 @@ public:
     bool isDeleted;
     bool isPinned;
     bool isFavorite;
+    void deleteImage();
+    bool asImage();
 
        Item(){}
-       Item(int,int,string,QDate,QDate,bool,QDate,bool,bool,bool);
-       Item(int,string,QDate,QDate,bool,QDate,bool,bool,bool);
+       Item(int,int,QString,QDate,QDate,bool,QDate,bool,bool,bool);
+       Item(int,QString,QDate,QDate,bool,QDate,bool,bool,bool);
 
     void setCheck();
     void setPin();
@@ -33,7 +37,7 @@ public:
     void del();
 };
 
-inline Item::Item(int _itemID, int _userID, string _title, QDate _createDate, QDate _checkDate, bool _isChecked, QDate _deleteDate, bool _isDeleted, bool _isPinned, bool _isFavorite)
+inline Item::Item(int _itemID, int _userID, QString _title, QDate _createDate, QDate _checkDate, bool _isChecked, QDate _deleteDate, bool _isDeleted, bool _isPinned, bool _isFavorite)
 {
     this->itemID = _itemID;
     this->userID = _userID;
@@ -47,7 +51,7 @@ inline Item::Item(int _itemID, int _userID, string _title, QDate _createDate, QD
     this->isFavorite = _isFavorite;
 }
 
-inline Item::Item( int _userID, string _title, QDate _createDate, QDate _checkDate, bool _isChecked, QDate _deleteDate, bool _isDeleted,bool _isPinned, bool _isFavorite)
+inline Item::Item( int _userID, QString _title, QDate _createDate, QDate _checkDate, bool _isChecked, QDate _deleteDate, bool _isDeleted,bool _isPinned, bool _isFavorite)
 {
     this->userID = _userID;
     this->title = _title;
@@ -73,11 +77,19 @@ inline void Item::setFav(){
 }
 
 inline void Item::setImg(){
-    cout << "Setting Img: " << this->title << endl;
+    cout << "Setting Img: " << this->title.toStdString() << endl;
 }
 
 inline void Item::del(){
-    cout << "Deleting: " << this->title << endl;
+    cout << "Deleting: " << this->title.toStdString() << endl;
+}
+
+inline bool Item::asImage(){
+    return this->image.isNull();
+}
+
+inline void Item::deleteImage(){
+    this->image = QPixmap();
 }
 
 Q_DECLARE_METATYPE(Item*)

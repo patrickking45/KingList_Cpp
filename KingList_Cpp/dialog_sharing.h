@@ -2,7 +2,7 @@
 #define SHARINGDIALOG_H
 
 #include <QDialog>
-#include <permission.h>
+#include <model_permission.h>
 
 using namespace std;
 
@@ -17,7 +17,7 @@ class SharingDialog : public QDialog
 public:
     explicit SharingDialog(QWidget *parent = 0);
     ~SharingDialog();
-    void setPermissions(vector<Permission*>);
+    void setPermissions(vector<Permission*>, int);
     void showShares();
     vector<Permission*> getPermissions();
     Permission* getPermissionById(int);

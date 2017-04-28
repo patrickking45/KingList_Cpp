@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QListWidgetItem>
-#include <liste.h>
+#include <model_liste.h>
 
 using namespace std;
 
@@ -30,6 +30,8 @@ public slots:
     void clickedFav(int buttonId);
     void clickedImg(int buttonId);
     void clickedDel(int buttonId);
+    void on_connexionAction_triggered();
+    void on_registerAction_triggered();
     void on_deconnexionAction_triggered();
     void on_partageAction_triggered();
     void on_refreshAction_triggered();

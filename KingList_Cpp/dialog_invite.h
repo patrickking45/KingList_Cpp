@@ -2,7 +2,7 @@
 #define INVITEDIALOG_H
 
 #include <QDialog>
-#include <permission.h>
+#include <model_permission.h>
 
 namespace Ui {
 class InviteDialog;
@@ -16,6 +16,7 @@ public:
     explicit InviteDialog(QWidget *parent = 0);
     ~InviteDialog();
     Permission* getPermission();
+    Permission* newPermission;
 
 private slots:
     void on_btn_cancel_clicked();

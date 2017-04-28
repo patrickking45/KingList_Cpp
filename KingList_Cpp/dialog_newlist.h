@@ -2,7 +2,7 @@
 #define NEWLISTDIALOG_H
 
 #include <QDialog>
-#include <liste.h>
+#include <model_liste.h>
 
 namespace Ui {
 class NewListDialog;
